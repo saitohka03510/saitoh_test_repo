@@ -1,5 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const startButton = document.getElementById('startButton');
+const countdownElement = document.getElementById('countdown');
 
 // Game variables
 let ballX = canvas.width / 2;
@@ -18,16 +20,38 @@ let computerScore = 0;
 const WINNING_SCORE = 3;
 
 let showingWinScreen = false;
+let gameRunning = false;
+
+// Start button event listener
+startButton.addEventListener('click', startGame);
+
+function startGame() {
+    startButton.classList.add('hidden');
+    countdownElement.classList.remove('hidden');
+    let count = 3;
+    countdownElement.textContent = count;
+
+    const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownElement.textContent = count;
+        } else {
+            clearInterval(countdownInterval);
+            countdownElement.classList.add('hidden');
+            gameRunning = true;
+            gameLoop();
+        }
+    }, 1000);
+}
 
 // Game loop
 function gameLoop() {
+    if (!gameRunning) return;
+
     moveEverything();
     drawEverything();
     requestAnimationFrame(gameLoop);
 }
-
-// Start the game loop
-gameLoop();
 
 // Mouse movement
 canvas.addEventListener('mousemove', (evt) => {
@@ -70,17 +94,16 @@ function moveEverything() {
     if (ballX < paddleWidth) {
         if (ballY > playerY && ballY < playerY + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-            ballSpeedX *= 1.05; // Increase speed
+            ballSpeedX *= 1.1; // Increase speed
             let deltaY = ballY - (playerY + paddleHeight / 2);
             ballSpeedY = deltaY * 0.35;
         } else {
             computerScore++; // must be BEFORE ballReset()
             resetBall();
-        }
-    } else if (ballX > canvas.width - paddleWidth) {
+        }    } else if (ballX > canvas.width - paddleWidth) {
         if (ballY > computerPaddleY && ballY < computerPaddleY + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-            ballSpeedX *= 1.05; // Increase speed
+            ballSpeedX *= 1.1; // Increase speed
             let deltaY = ballY - (computerPaddleY + paddleHeight / 2);
             ballSpeedY = deltaY * 0.35;
         } else {
@@ -95,9 +118,9 @@ function moveEverything() {
 function computerAI() {
     const computerPaddleCenter = computerPaddleY + (paddleHeight / 2);
     if (computerPaddleCenter < ballY - 35) {
-        computerPaddleY += 6;
+        computerPaddleY += 8;
     } else if (computerPaddleCenter > ballY + 35) {
-        computerPaddleY -= 6;
+        computerPaddleY -= 8;
     }
 }
 
